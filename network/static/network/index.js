@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded',function(){
 
 function createPost() {
     // post Post if form has been submitted
-    //document.querySelector('#createPost-form').onsubmit = event => {
-    //    event.preventDefault();
-    //}
+    document.querySelector('#createPost-form').onsubmit = event => {
+        event.preventDefault();
+    }
     let postContent = document.querySelector('#createPost-content').value;
     
     fetch('/createPost', {
@@ -28,9 +28,15 @@ function createPost() {
             credentials: 'same-origin',
         })
     })
-    document.querySelector('#createPost-content').value = "";
+    .then(response => response.json())
+    .then(post => {
+            post = post[0]
+            postContainer = createPostDivs(post)
 
-    load_posts('all');
+            firstElement=document.querySelector('#listPosts-view').firstElementChild;
+            document.querySelector('#listPosts-view').insertBefore(postContainer,firstElement);
+    })
+    document.querySelector('#createPost-content').value = "";
 }
 
 function load_posts(set){
@@ -38,42 +44,47 @@ function load_posts(set){
     .then(response => response.json())
     .then(posts => {
         posts.forEach( post => {
-            let postContainer = document.createElement('div');
-            let postCreator = document.createElement('div');
-            let postContent = document.createElement('div');
-            let postLikes = document.createElement('div');
-            let postTimestamp = document.createElement('div');
+            postContainer = createPostDivs(post)
 
-            postContainer.className ="m-2 border border-primary rounded bg-light";
-            postCreator.className ="m-2";
-            postContent.className ="m-2";
-            postLikes.className ="m-2";
-            postTimestamp.className ="m-2";
-
-            postContainer.setAttribute("name","post-container");
-            postCreator.setAttribute("name","post-creator");
-            postContent.setAttribute("name","post-content");
-            postLikes.setAttribute("name","post-likes");
-            postTimestamp.setAttribute("name","post-timestamp");
-
-            postCreator.innerHTML = `<u><b>${post.creator}</b></u> post-id: ${post.id}`;
-            postContent.innerHTML = `<br> ${post.content}`
-            postLikes.innerHTML = `<br> Likes: ${post.likes}`
-            postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`
-
-            postContainer.dataset.postId = post.id
-
-            postContainer.appendChild(postCreator);
-            postContainer.appendChild(postContent);
-            postContainer.appendChild(postLikes);
-            postContainer.appendChild(postTimestamp);
-
-            console.log(post)
             document.querySelector('#listPosts-view').append(postContainer);
         });
     });
 }
 
+// define the structure of a postContainer that should be created
+function createPostDivs(post){
+    let postContainer = document.createElement('div');
+    let postCreator = document.createElement('div');
+    let postContent = document.createElement('div');
+    let postLikes = document.createElement('div');
+    let postTimestamp = document.createElement('div');
+
+    postContainer.className ="m-2 border border-primary rounded bg-light";
+    postCreator.className ="m-2";
+    postContent.className ="m-2";
+    postLikes.className ="m-2";
+    postTimestamp.className ="m-2";
+
+    postContainer.setAttribute("name","post-container");
+    postCreator.setAttribute("name","post-creator");
+    postContent.setAttribute("name","post-content");
+    postLikes.setAttribute("name","post-likes");
+    postTimestamp.setAttribute("name","post-timestamp");
+
+    postCreator.innerHTML = `<u><b>${post.creator}</b></u> post-id: ${post.id}`;
+    postContent.innerHTML = `<br> ${post.content}`
+    postLikes.innerHTML = `<br> Likes: ${post.likes}`
+    postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`
+
+    postContainer.dataset.postId = post.id
+
+    postContainer.appendChild(postCreator);
+    postContainer.appendChild(postContent);
+    postContainer.appendChild(postLikes);
+    postContainer.appendChild(postTimestamp);
+    
+    return postContainer;
+}
 
 // make sure the csrf token functionality can be used
 // using jQuery

@@ -38,7 +38,9 @@ def createPost(request):
 
     # upload post to db
     post.save()
-    return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
+    print(post)
+    return JsonResponse([post.serialize()], safe = False)
+   # return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
 
 def load_posts(request, set):
     if set == 'all':
@@ -54,8 +56,8 @@ def load_posts(request, set):
             "error": "no set to filter posts in db for defined."
         }, status=400) 
     posts = posts.order_by("-timestamp").all()
-    for post in posts:
-        print(post)
+    #for post in posts:
+        #print(post)
     #return JsonResponse([post.serialize() for post in posts], safe=False)
     return JsonResponse([post.serialize() for post in posts], safe = False)
 
