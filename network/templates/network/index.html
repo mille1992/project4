@@ -1,5 +1,10 @@
 {% extends "network/layout.html" %}
 {% load static %}
+
+{% block script %}
+    <script src="{% static 'network/index.js' %}"></script>
+{% endblock %}
+
 {% block body %}
 <div id="createPost-view" class="border">
     <form id="createPost-form" class="m-2">
@@ -11,7 +16,6 @@
         </div>
     </form>
 </div>
-
 <div id="listPosts-view" class="border">
 
 </div>    
@@ -19,6 +23,3 @@
 
 {% endblock %}
 
-{% block script %}
-    <script src="{% static 'network/index.js' %}"></script>
-{% endblock %}

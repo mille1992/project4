@@ -59,7 +59,7 @@ function createPostDivs(post){
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
 
-    postContainer.className ="m-2 border border-primary rounded bg-light";
+    postContainer.className ="m-2  border-primary rounded bg-light";
     postCreator.className ="m-2";
     postContent.className ="m-2";
     postLikes.className ="m-2";
@@ -71,7 +71,7 @@ function createPostDivs(post){
     postLikes.setAttribute("name","post-likes");
     postTimestamp.setAttribute("name","post-timestamp");
 
-    postCreator.innerHTML = `<u><b>${post.creator}</b></u> post-id: ${post.id}`;
+    postCreator.innerHTML = `<u><b> <a href="/profile/${post.creatorId}"> ${post.creator} </a>  </b></u>`;
     postContent.innerHTML = `<br> ${post.content}`
     postLikes.innerHTML = `<br> Likes: ${post.likes}`
     postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`

@@ -12,7 +12,52 @@ import json
 def index(request):
     return render(request, "network/index.html")
 
-#@csrf_exempt
+def followUnfollow(request, username):
+    creator = User.objects.get(username = username)
+    profile = Profile.objects.get(user_id = creator.id)
+    currUser = User.objects.get(id = request.user.id)
+
+
+    if profile.profileFollowers.filter(id = currUser.id):
+        profile.profileFollowers.remove(currUser)
+        profile.save()
+        currUser.followsByUser.remove(profile)
+        currUser.save()
+        userFollowsProfile = False
+    else:
+        profile.profileFollowers.add(currUser)
+        profile.save()
+        currUser.followsByUser.add(profile)
+        currUser.save()
+        userFollowsProfile = True
+ 
+    if userFollowsProfile==True:
+        return JsonResponse({"message": "Sucessfully followed"}, safe = False, status=201)
+    else:
+        return JsonResponse({"message": "Sucessfully unfollowed"}, safe = False, status=201)
+
+
+def update_followers(request, username):
+    creator = User.objects.get(username = username)
+    profile = Profile.objects.get(user_id = creator.id)
+    currUser = User.objects.get(id = request.user.id)
+
+    followers = profile.profileFollowers.all()
+    followsByUser = creator.followsByUser.all()
+    
+    followers_cnt = followers.count()
+    followsByUser_cnt = followsByUser.count()
+
+    if profile.profileFollowers.filter(id = currUser.id):
+        currUserIsFollower = True
+    else:
+        currUserIsFollower = False
+    print(currUserIsFollower)
+    return JsonResponse({"followers_cnt": followers_cnt, "followsByUser_cnt": followsByUser_cnt, "currUserIsFollower": currUserIsFollower}, safe = False)
+
+
+
+
 def createPost(request):
     # Composing a new email must be via POST
     if request.method != "POST":
@@ -38,28 +83,31 @@ def createPost(request):
 
     # upload post to db
     post.save()
-    print(post)
     return JsonResponse([post.serialize()], safe = False)
    # return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
+
 
 def load_posts(request, set):
     if set == 'all':
         posts = Post.objects.all()
-    #elif set == 'subset':
-        # code to filter for a subset of the posts in db
-        #
-        #
-        #----
-        #posts = Post.objects.filter(creator = 2)
     else:
-        return JsonResponse({
-            "error": "no set to filter posts in db for defined."
-        }, status=400) 
+        creator = User.objects.get(username = set)
+        posts = Post.objects.all().filter(creator_id = creator.id)
+        #for post in posts:
+        #    print(post)
     posts = posts.order_by("-timestamp").all()
-    #for post in posts:
-        #print(post)
-    #return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
     return JsonResponse([post.serialize() for post in posts], safe = False)
+
+
+def profile_view(request,creator_id):
+    creator_username = User.objects.get(id = creator_id)
+    return render(request, "network/profile.html", {
+            "creator_id": creator_id,
+            "creator_username": creator_username.username
+        })
+
 
 def login_view(request):
     if request.method == "POST":
@@ -103,11 +151,14 @@ def register(request):
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+            newProfile = Profile.objects.create(user = user)
+            newProfile.save()
         except IntegrityError:
             return render(request, "network/register.html", {
                 "message": "Username already taken."
             })
         login(request, user)
+
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "network/register.html")

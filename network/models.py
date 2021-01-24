@@ -10,7 +10,7 @@ class User(AbstractUser):
 
     def serialize(self):
         return {
-            "id": self.id,
+            "user-id": self.id,
             "username": self.username,
             "followsByUser": self.followsByUser
         }
@@ -27,9 +27,10 @@ class Post(models.Model):
 
     def serialize(self):
         return {
-            "id": self.id,
+            "post-id": self.id,
             "content": self.content,
             "creator": self.creator.username,
+            "creatorId": self.creator.id,
             "likes": self.likes,
             "timestamp": self.timestamp.strftime("%d %b %Y, %I:%M %p")
         }
@@ -44,7 +45,8 @@ class Profile(models.Model):
 
     def serialize(self):
         return {
-            "id": self.id,
-            "user": self.user,
+            "profile-id": self.id,
+            "user": self.user.username,
+            "userId": self.user.id,
             "profileFollowers": self.profileFollowers
         }

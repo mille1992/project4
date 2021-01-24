@@ -1,0 +1,32 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block script %}
+    <script src="{% static 'network/profile.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="m-2">
+        <h1  id="profile-creator">{{ creator_username }}</h1>
+        {% if user.is_authenticated and user.id != creator_id %}
+        <button class="m-2" id="profile-follow-btn">
+            Follow
+        </button>
+        {% endif %}
+
+    </div>
+
+    <div class="m-2" id="profile-followers">
+        Followers: <div id="profile-cntFollowers">0</div>
+    </div>
+    <div class="m-2" id="profile-follows">
+        Following:  <div id="profile-cntFollows">0</div>
+    </div>
+    <div class="m-2 border border-primary rounded" id="listPosts-view">
+        <h2 class="text-center bg-primary">Latest Posts by {{ creator_username }}</h1>
+    </div>
+
+
+
+{% endblock %}
+
