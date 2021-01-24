@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded',function(){
 
-    // Add click event to createPost Submit button
-    document.querySelector('#createPost-submit').addEventListener('click', createPost);
+    if(document.querySelector('#createPost-submit')){
+        // Add click event to createPost Submit button
+        document.querySelector('#createPost-submit').addEventListener('click', createPost);
+    }
+
     
     // load all posts in the database as standard
     load_posts('all');

@@ -6,6 +6,8 @@
 {% endblock %}
 
 {% block body %}
+
+{% if user.is_authenticated %}
 <div id="createPost-view" class="border">
     <form id="createPost-form" class="m-2">
         <div class="form-group">
@@ -16,6 +18,7 @@
         </div>
     </form>
 </div>
+{% endif %}
 <div id="listPosts-view" class="border">
 
 </div>    
