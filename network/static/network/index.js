@@ -4,6 +4,17 @@ document.addEventListener('DOMContentLoaded',function(){
         // Add click event to createPost Submit button
         document.querySelector('#createPost-submit').addEventListener('click', createPost);
     }
+    if(document.querySelector('#followingLink')){
+        // Add click event to createPost Submit button
+        document.querySelector('#followingLink').addEventListener('click', () => {
+            document.querySelectorAll(' [name="post-container"] ').forEach(post => {
+                    post.innerHTML=""
+            })
+            document.querySelector('#postHeader').innerHTML = "Posts of your followed Users";
+
+            load_posts('followingLink');
+        })
+    }
 
     
     // load all posts in the database as standard

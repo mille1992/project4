@@ -90,6 +90,13 @@ def createPost(request):
 def load_posts(request, set):
     if set == 'all':
         posts = Post.objects.all()
+    elif set == "followingLink":
+        user = request.user
+        followsByUser = user.followsByUser.all()
+        followUserIds = []
+        for follow in followsByUser:
+            followUserIds.append(follow.user_id)
+        posts = Post.objects.all().filter(creator_id__in = followUserIds)
     else:
         creator = User.objects.get(username = set)
         posts = Post.objects.all().filter(creator_id = creator.id)
