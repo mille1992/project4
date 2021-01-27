@@ -120,6 +120,9 @@ function createPostDivs(post){
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
 
+    if (document.querySelector("#currUserUsername").innerHTML == post.creator){
+        console.log(post.creator)
+    }
     postContainer.className ="m-2  border-primary rounded bg-light";
     postCreator.className ="m-2";
     postContent.className ="m-2";

@@ -5,6 +5,50 @@ document.addEventListener('DOMContentLoaded',function(){
             followUnfollow(profileUsername);
         });
     }
+
+    // if following nav item is existing (i.e. user is logged in)
+    if(document.querySelector('#followingLink')){
+        // Add click event to createPost Submit button
+        document.querySelector('#followingLink').addEventListener('click', () => {
+            // remove all currently displayed posts
+            document.querySelectorAll('[name="post-container"]').forEach(post => {
+                post.innerHTML=""
+            })
+            // change post section header
+            document.querySelector('#postHeader').innerHTML = "Posts of your followed Users";
+            // load posts made from people the user is following
+            load_posts('followingLink');
+        })
+    }
+
+    // add click event listener to page navigation buttons "Next" and "Previous"
+    document.querySelectorAll('[name="page_nav"]').forEach( nav => {
+        // if a "Next" or "Previous" is clicked
+        nav.addEventListener('click', event => {
+            // get current page number from DOM element
+            pageNumber = document.querySelector('#currPageNumberIndicator').innerHTML;  
+            
+            // remove all currently displayed posts
+            document.querySelectorAll('[name="post-container"]').forEach(post => {
+                post.innerHTML=""
+            })
+
+            // if on index page
+            if (document.querySelector('#postHeader').innerHTML = "Latest Posts"){
+                // handover argument to load index-posts based on the page number and the dataset value of the pagenav 
+                load_posts(`all+${event.target.dataset.pagecnt}+${pageNumber}`);
+            } 
+            // if on index page
+            if (document.querySelector('#postHeader').innerHTML == "Posts of your followed Users") {
+                // handover argument to load following-posts based on the page number and the dataset value of the pagenav
+                load_posts(`followingLink+${event.target.dataset.pagecnt}+${pageNumber}`);
+            }
+
+        })
+    })
+
+
+
     update_followers(profileUsername)
     load_posts(profileUsername)
 
