@@ -3,8 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
-
+from django.core.paginator import Paginator
+from django.urls.base import clear_url_caches
 
 from .models import *
 import json
@@ -88,9 +88,9 @@ def createPost(request):
 
 
 def load_posts(request, set):
-    if set == 'all':
+    if 'all' in set:
         posts = Post.objects.all()
-    elif set == "followingLink":
+    elif "followingLink" in set:
         user = request.user
         followsByUser = user.followsByUser.all()
         followUserIds = []
@@ -104,8 +104,30 @@ def load_posts(request, set):
         #    print(post)
     posts = posts.order_by("-timestamp").all()
 
+    p = Paginator(posts,10)
+    currPageNum = [int(s) for s in set.split("+") if s.isdigit()]
+    if currPageNum == []:
+        currPageNum = 1
+    else:
+        currPageNum = currPageNum[0]
+        
+    if 'next' in set:
+        currPageNum +=1
+    elif 'previous' in set:
+        currPageNum -=1
 
-    return JsonResponse([post.serialize() for post in posts], safe = False)
+    posts_currPage = p.page(currPageNum)
+    posts_currPageObjects = p.page(currPageNum).object_list
+
+    numOfPages = p.num_pages
+    prevPageExisting = posts_currPage.has_previous()
+    nextPageExisting = posts_currPage.has_next()
+
+    #print(f"Paginator - number of pages: {p.num_pages}")
+    #print(f"Paginator - first page objects: {p.page(1).object_list}")
+    #test = [posts_paginated.serialize() for post in posts],["test"]
+    #print(test[1])
+    return JsonResponse([[postObject.serialize() for postObject in posts_currPageObjects],[numOfPages, prevPageExisting, nextPageExisting, currPageNum]], safe = False)
 
 
 def profile_view(request,creator_id):

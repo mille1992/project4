@@ -24,9 +24,9 @@ function update_followers(username){
     .then(followInfos => {
         document.querySelector("#profile-cntFollowers").innerHTML = followInfos.followers_cnt;
         document.querySelector("#profile-cntFollows").innerHTML = followInfos.followsByUser_cnt;
-        if(followInfos.currUserIsFollower == true){
+        if(followInfos.currUserIsFollower == true && document.querySelector('#profile-follow-btn')){
             document.querySelector("#profile-follow-btn").innerHTML = "Unfollow";
-        }else{
+        }else if(document.querySelector('#profile-follow-btn')){
             document.querySelector("#profile-follow-btn").innerHTML = "Follow";
         }
     })
@@ -37,6 +37,7 @@ function load_posts(set){
     .then(response => response.json())
     .then(posts => {
         posts.forEach( post => {
+            post=post[0]
             postContainer = createPostDivs(post)
 
             document.querySelector('#listPosts-view').append(postContainer);
