@@ -48,7 +48,19 @@ document.addEventListener('DOMContentLoaded',function(){
 
     // load all posts in the database as standard
     load_posts('all');
-
+    /*
+    document.querySelectorAll('[name="editButton"]').forEach( btn => {
+        console.log(btn)
+        btn.addEventListener('click', event => {
+            button = event.target
+            console.log(button)
+            console.log(event)
+            if(document.querySelector('#currUserUsername"').innerHTML != `<strong>${button.dataset.creatorId}</strong>`){
+                console.log("editable")
+            }
+        })
+    })
+    */
 });
 
 function createPost() {
@@ -119,34 +131,52 @@ function createPostDivs(post){
     let postContent = document.createElement('div');
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
-
-    if (document.querySelector("#currUserUsername").innerHTML == post.creator){
-        console.log(post.creator)
+    let editButton = document.createElement('BUTTON');   
+ 
+    if (document.querySelector("#currUserUsername").innerHTML != `<strong>${post.creator}</strong>`){
+        // hide edit button if user is not creator of a post
+        editButton.style.display = "none"
     }
+
+
     postContainer.className ="m-2  border-primary rounded bg-light";
     postCreator.className ="m-2";
     postContent.className ="m-2";
     postLikes.className ="m-2";
     postTimestamp.className ="m-2";
+    editButton.className="m-2 btn btn-info"
 
     postContainer.setAttribute("name","post-container");
     postCreator.setAttribute("name","post-creator");
     postContent.setAttribute("name","post-content");
     postLikes.setAttribute("name","post-likes");
     postTimestamp.setAttribute("name","post-timestamp");
+    editButton.name = "editButton"
+
 
     postCreator.innerHTML = `<u><b> <a href="/profile/${post.creatorId}"> ${post.creator} </a>  </b></u>`;
     postContent.innerHTML = `<br> ${post.content}`
     postLikes.innerHTML = `<br> Likes: ${post.likes}`
     postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`
+    
+    editButton.innerHTML = "Edit"
+    editButton.dataset.creatorId = post.creatorId;
 
     postContainer.dataset.postId = post.id
+
+    editButton.addEventListener('click', event => {
+        button = event.target
+        if(document.querySelector("#currUserUsername").innerHTML != `<strong>${button.dataset.creatorId}</strong>`){
+            console.log("editable")
+        }
+    })
 
     postContainer.appendChild(postCreator);
     postContainer.appendChild(postContent);
     postContainer.appendChild(postLikes);
     postContainer.appendChild(postTimestamp);
-    
+    postContainer.appendChild(editButton);
+
     return postContainer;
 }
 
