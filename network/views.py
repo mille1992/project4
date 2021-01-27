@@ -52,7 +52,6 @@ def update_followers(request, username):
         currUserIsFollower = True
     else:
         currUserIsFollower = False
-    print(currUserIsFollower)
     return JsonResponse({"followers_cnt": followers_cnt, "followsByUser_cnt": followsByUser_cnt, "currUserIsFollower": currUserIsFollower}, safe = False)
 
 
@@ -88,7 +87,12 @@ def createPost(request):
 
 
 def load_posts(request, set):
-    if 'all' in set:
+    if User.objects.filter(username = set).exists():
+        creator = User.objects.get(username = set)
+        posts = Post.objects.all().filter(creator_id = creator.id)
+        #for post in posts:
+        #    print(post)
+    elif 'all' in set:
         posts = Post.objects.all()
     elif "followingLink" in set:
         user = request.user
@@ -97,11 +101,7 @@ def load_posts(request, set):
         for follow in followsByUser:
             followUserIds.append(follow.user_id)
         posts = Post.objects.all().filter(creator_id__in = followUserIds)
-    else:
-        creator = User.objects.get(username = set)
-        posts = Post.objects.all().filter(creator_id = creator.id)
-        #for post in posts:
-        #    print(post)
+
     posts = posts.order_by("-timestamp").all()
 
     p = Paginator(posts,10)

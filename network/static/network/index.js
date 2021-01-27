@@ -90,6 +90,7 @@ function load_posts(set){
         hasPreviousPage = posts[1][1]
         hasNextPage = posts[1][2]
         currPageNum = posts[1][3]
+
         if (hasPreviousPage == true){
             document.querySelector('#page-previous').style.display = "block"
         }else{
