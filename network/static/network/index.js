@@ -88,11 +88,12 @@ function createPost() {
             post = post[0]
             postContainer = createPostDivs(post)
 
-            firstElement=document.querySelector('#listPosts-view').firstElementChild;
+            firstElement = document.querySelector('#listPosts-view').firstElementChild;
             document.querySelector('#listPosts-view').insertBefore(postContainer,firstElement);
     })
     document.querySelector('#createPost-content').value = "";
 }
+
 
 function load_posts(set){
     fetch(`posts/${set}`)
@@ -132,11 +133,6 @@ function createPostDivs(post){
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
     let editButton = document.createElement('BUTTON');   
- 
-    if (document.querySelector("#currUserUsername").innerHTML != `<strong>${post.creator}</strong>`){
-        // hide edit button if user is not creator of a post
-        editButton.style.display = "none"
-    }
 
 
     postContainer.className ="m-2  border-primary rounded bg-light";
@@ -154,31 +150,119 @@ function createPostDivs(post){
     editButton.name = "editButton"
 
 
-    postCreator.innerHTML = `<u><b> <a href="/profile/${post.creatorId}"> ${post.creator} </a>  </b></u>`;
-    postContent.innerHTML = `<br> ${post.content}`
+    postCreator.innerHTML = `<u><b> <a href="/profile/${post.creatorId}"> ${post.creator} </a>  </b></u> `;
+    postContent.innerHTML = `${post.content}`
     postLikes.innerHTML = `<br> Likes: ${post.likes}`
     postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`
     
     editButton.innerHTML = "Edit"
     editButton.dataset.creatorId = post.creatorId;
+    editButton.dataset.postId = post.postId;
 
-    postContainer.dataset.postId = post.id
+    postContainer.dataset.postId = post.postId;
 
+    // when EDIT button is clicked
     editButton.addEventListener('click', event => {
-        button = event.target
-        if(document.querySelector("#currUserUsername").innerHTML != `<strong>${button.dataset.creatorId}</strong>`){
-            console.log("editable")
+        if(document.querySelector("#currUserUsername").innerHTML != `<strong>${editButton.dataset.creatorId}</strong>`){
+            /*
+                Add code to hide the post and instead open up a textfield with the posts content as prefilled value
+            */
+            // get post container
+            postContainer = editButton.parentNode
+            // get post ID
+            postId = editButton.dataset.postId
+            // replace post container content with a form to input modified content 
+            postContainer.innerHTML = ""
+
+            // configure modification form
+            modifyPostContainer = document.createElement('div')
+            modifyPostContainer.id = "modifyPostContainer"
+            modifyPostContainer.className = "border"
+
+            modifyPostForm = document.createElement('form')
+            modifyPostForm.id = "modifyPostForm"
+            modifyPostForm.className = "m-2"
+
+            modifyPostFormGroup = document.createElement('div')
+            modifyPostFormGroup.className = "form-group"
+
+            textInputLabel = document.createElement('label')
+            textInputLabel.innerHTML = "Modify Post"
+
+            textInput = document.createElement('textarea')
+            textInput.id = "modifyPost-content"
+            textInput.className = "form-control"
+            textInput.value = postContent.innerHTML
+
+        	submitButton = document.createElement('input')
+            submitButton.type = "submit"
+            submitButton.id = "modifyPost-submit"
+            submitButton.className = "btn btn-primary mt-2"
+            submitButton.value = "Submit"
+
+            // structure form in the right hirarchy, bottom to top
+            modifyPostFormGroup.appendChild(textInputLabel)
+            modifyPostFormGroup.appendChild(textInput)
+            modifyPostFormGroup.appendChild(submitButton)
+            modifyPostForm.appendChild(modifyPostFormGroup)
+            modifyPostContainer.appendChild(modifyPostForm)
+
+            postContainer.appendChild(modifyPostContainer)
+
+            submitButton.addEventListener('click', modifyPost)
         }
     })
 
     postContainer.appendChild(postCreator);
+    postContainer.appendChild(document.createElement("br"))
     postContainer.appendChild(postContent);
     postContainer.appendChild(postLikes);
     postContainer.appendChild(postTimestamp);
-    postContainer.appendChild(editButton);
+    if (document.querySelector("#currUserUsername").innerHTML == `<strong>${post.creator}</strong>`){
+        // hide edit button if user is not creator of a post
+        postContainer.appendChild(editButton);
+    }
 
     return postContainer;
 }
+
+// modify existing post
+function modifyPost() {
+    // post Post if form has been submitted
+    document.querySelector('#modifyPostForm').onsubmit = event => {
+        event.preventDefault();
+    }
+    let modifiedPostContent = document.querySelector('#modifyPost-content').value;
+    
+    fetch(`modifyPost/${postId}`, {
+        method: 'POST',
+        //headers to enable the csrf_token functionality
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            modifiedPostContent: modifiedPostContent,
+            postId: postId,
+            credentials: 'same-origin',
+        })
+    })
+    .then(response => response.json())
+    .then(modifiedPost => {
+            // receive modified post Json and assign values to modified Post variable
+            modifiedPost = modifiedPost[0]
+            modifiedPostContainer = createPostDivs(modifiedPost)
+            firstElement = document.querySelector('#listPosts-view').firstElementChild;
+            document.querySelector('#listPosts-view').insertBefore(modifiedPostContainer,firstElement);
+            
+            // remove all modification input fields
+            document.querySelectorAll('#modifyPostContainer').forEach(modifyPostInputField => {
+                modifyPostInputField.innerHTML=""
+            })
+    })
+}
+
 
 // make sure the csrf token functionality can be used
 // using jQuery

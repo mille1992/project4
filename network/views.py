@@ -85,6 +85,38 @@ def createPost(request):
     return JsonResponse([post.serialize()], safe = False)
    # return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
 
+def modifyPost(request, postId):
+    # Composing a new email must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+    
+
+    # prepare database upload
+    # load post content in request
+    data = json.loads(request.body)
+    content = data.get("modifiedPostContent")
+
+    # if empty post throw error
+    if content == [""]:
+        return JsonResponse({
+            "error": "At least one recipient required."
+        }, status=400)   
+    
+    # get original post
+    originalPost = Post.objects.get(id = postId)
+    originalPost.content = content 
+    print(f"Request: {request.user.id}")
+    print(f"Creator: {originalPost.creator.id}")
+    if request.user.id != originalPost.creator.id:
+        return JsonResponse({"error": "Editing User is not the Posts creator"}, status=400)
+
+
+    
+    # upload post to db
+    originalPost.save()
+    return JsonResponse([originalPost.serialize()], safe = False)
+   # return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
+
 
 def load_posts(request, set):
     if User.objects.filter(username = set).exists():

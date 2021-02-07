@@ -27,7 +27,7 @@ class Post(models.Model):
 
     def serialize(self):
         return {
-            "post-id": self.id,
+            "postId": self.id,
             "content": self.content,
             "creator": self.creator.username,
             "creatorId": self.creator.id,
