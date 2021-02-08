@@ -85,6 +85,39 @@ def createPost(request):
     return JsonResponse([post.serialize()], safe = False)
    # return JsonResponse({"message": "Post sucessfully uploaded"}, status=201)
 
+def likes(request,postIdString):
+    numLikes = 0
+    postId = 0
+    postId_unformatted = 0
+    userLikesPost = None
+    currUser = User.objects.get(id = request.user.id)
+    postId_unformatted = [int(s) for s in postIdString.split("+") if s.isdigit()]
+    if postId_unformatted == []:
+        postId = 0
+    else:
+        postId = postId_unformatted[0]
+    # if post exists count number of likes
+    if Post.objects.filter(id = postId).exists() and "fetch" in postIdString:
+        post = Post.objects.get(id = postId)
+        numLikes = post.likingUsers.count()
+        if post.likingUsers.filter(id = currUser.id):
+            userLikesPost = True
+    elif Post.objects.filter(id = postId).exists() and "change" in postIdString:
+        post = Post.objects.get(id = postId)
+        if post.likingUsers.filter(id = currUser.id):
+            post.likingUsers.remove(currUser)
+            post.save()
+            userLikesPost = False
+        else:
+            post.likingUsers.add(currUser)
+            post.save()
+            userLikesPost = True
+        numLikes = post.likingUsers.count()
+    print(userLikesPost)
+    return JsonResponse({"numLikes": numLikes, "userLikesPost": userLikesPost}, safe = False)
+
+
+
 def modifyPost(request, postId):
     # Composing a new email must be via POST
     if request.method != "POST":

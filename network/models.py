@@ -21,7 +21,9 @@ class Post(models.Model):
     likes = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True)
     creator = models.ForeignKey("User", on_delete=models.PROTECT, related_name="postCreator")
-    
+    likingUsers = models.ManyToManyField("User", related_name="likedPostsByUser")
+
+
     def __str__(self):
         return f" post-id: {self.id}, Creator: {self.creator}, likes: {self.likes}, timestamp: {self.timestamp}"
 
@@ -32,7 +34,7 @@ class Post(models.Model):
             "creator": self.creator.username,
             "creatorId": self.creator.id,
             "likes": self.likes,
-            "timestamp": self.timestamp.strftime("%d %b %Y, %I:%M %p")
+            "timestamp": self.timestamp.strftime("%d %b %Y, %I:%M %p"),
         }
 
 

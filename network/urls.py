@@ -15,5 +15,6 @@ urlpatterns = [
     path("modifyPost/<int:postId>", views.modifyPost, name="modifyPost"),
     path("posts/<str:set>", views.load_posts, name="load_posts"),
     path("followunfollow/<str:username>", views.followUnfollow, name="followUnfollow"),
-    path("update_followers/<str:username>", views.update_followers, name="update_followers")
+    path("update_followers/<str:username>", views.update_followers, name="update_followers"),
+    path("likes/<str:postIdString>", views.likes, name="likes")
 ]

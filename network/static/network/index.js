@@ -132,8 +132,25 @@ function createPostDivs(post){
     let postContent = document.createElement('div');
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
-    let editButton = document.createElement('BUTTON');   
+    let editButton = document.createElement('BUTTON');
+    let likeButton = document.createElement('button');   
 
+
+    postId = post.postId   
+    // fetch likes per post when Like/Unlike is clicked
+    postIdString = `${postId}+fetch`
+    fetchLikes(postIdString,postLikes,likeButton)
+
+    //create like button and fetch likes when clicked
+    likeButton.className = "m-2 btn btn-primary"
+    likeButton.innerHTML = "Like"
+    likeButton.dataset.creatorId = post.creatorId;
+    likeButton.dataset.postId = post.postId;
+    likeButton.addEventListener('click', () => {
+        // fetch likes per post when Like/Unlike is clicked
+        postIdString = `${likeButton.dataset.postId}+change`
+        fetchLikes(postIdString,postLikes,likeButton)
+    })
 
     postContainer.className ="m-2  border-primary rounded bg-light";
     postCreator.className ="m-2";
@@ -162,7 +179,7 @@ function createPostDivs(post){
     postContainer.dataset.postId = post.postId;
 
     // when EDIT button is clicked
-    editButton.addEventListener('click', event => {
+    editButton.addEventListener('click', () => {
         if(document.querySelector("#currUserUsername").innerHTML != `<strong>${editButton.dataset.creatorId}</strong>`){
             /*
                 Add code to hide the post and instead open up a textfield with the posts content as prefilled value
@@ -217,6 +234,7 @@ function createPostDivs(post){
     postContainer.appendChild(document.createElement("br"))
     postContainer.appendChild(postContent);
     postContainer.appendChild(postLikes);
+    postContainer.appendChild(likeButton);
     postContainer.appendChild(postTimestamp);
     if (document.querySelector("#currUserUsername").innerHTML == `<strong>${post.creator}</strong>`){
         // hide edit button if user is not creator of a post
@@ -224,6 +242,23 @@ function createPostDivs(post){
     }
 
     return postContainer;
+}
+
+
+function fetchLikes(postIdString,postLikes,likeButton){
+    fetch(`likes/${postIdString}`,)
+    .then(response => response.json())
+    .then(likedPost => {
+        numLikes = likedPost.numLikes
+        userLikesPost = likedPost.userLikesPost
+        postLikes.innerHTML = `<br> Likes: ${numLikes}`
+        if(userLikesPost == true){
+            likeButton.innerHTML = "Unlike"
+        }else{
+            likeButton.innerHTML = "Like"
+        }
+    })
+
 }
 
 // modify existing post
