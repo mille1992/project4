@@ -14,9 +14,17 @@ document.addEventListener('DOMContentLoaded',function(){
             document.querySelectorAll('[name="post-container"]').forEach(post => {
                 post.innerHTML=""
             })
+            // remove all profile info
+            document.querySelector('#profile-creator').innerHTML = "";
+            document.querySelector('#profile-followers').innerHTML = "";
+            document.querySelector('#profile-follows').innerHTML = "";
+            if(document.querySelector('#profile-follow-btn')){
+            document.querySelector('#profile-follow-btn').remove();
+            }
             // change post section header
             document.querySelector('#postHeader').innerHTML = "Posts of your followed Users";
             // load posts made from people the user is following
+            console.log("test")
             load_posts('followingLink');
         })
     }
@@ -110,15 +118,32 @@ function load_posts(set){
 
 
 // define the structure of a postContainer that should be created
+// define the structure of a postContainer that should be created
 function createPostDivs(post){
     let postContainer = document.createElement('div');
     let postCreator = document.createElement('div');
     let postContent = document.createElement('div');
     let postLikes = document.createElement('div');
     let postTimestamp = document.createElement('div');
-    let editButton = document.createElement('BUTTON');   
+    let editButton = document.createElement('BUTTON');
+    let likeButton = document.createElement('button');   
 
 
+    postId = post.postId   
+    // fetch likes per post when Like/Unlike is clicked
+    postIdString = `${postId}+fetch`
+    fetchLikes(postIdString,postLikes,likeButton)
+
+    //create like button and fetch likes when clicked
+    likeButton.className = "m-2 btn btn-primary"
+    likeButton.innerHTML = "Like"
+    likeButton.dataset.creatorId = post.creatorId;
+    likeButton.dataset.postId = post.postId;
+    likeButton.addEventListener('click', () => {
+        // fetch likes per post when Like/Unlike is clicked
+        postIdString = `${likeButton.dataset.postId}+change`
+        fetchLikes(postIdString,postLikes,likeButton)
+    })
 
     postContainer.className ="m-2  border-primary rounded bg-light";
     postCreator.className ="m-2";
@@ -134,19 +159,20 @@ function createPostDivs(post){
     postTimestamp.setAttribute("name","post-timestamp");
     editButton.name = "editButton"
 
-    postCreator.innerHTML = `<u><b>${post.creator}</b></u>`;
-    postContent.innerHTML = `<br> ${post.content}`
+
+    postCreator.innerHTML = `<u><b> <a href="/profile/${post.creatorId}"> ${post.creator} </a>  </b></u> `;
+    postContent.innerHTML = `${post.content}`
     postLikes.innerHTML = `<br> Likes: ${post.likes}`
     postTimestamp.innerHTML = `<i> Created: ${post.timestamp} </i>`
-
-    postContainer.dataset.postId = post.id
-
+    
     editButton.innerHTML = "Edit"
     editButton.dataset.creatorId = post.creatorId;
     editButton.dataset.postId = post.postId;
 
+    postContainer.dataset.postId = post.postId;
+
     // when EDIT button is clicked
-    editButton.addEventListener('click', event => {
+    editButton.addEventListener('click', () => {
         if(document.querySelector("#currUserUsername").innerHTML != `<strong>${editButton.dataset.creatorId}</strong>`){
             /*
                 Add code to hide the post and instead open up a textfield with the posts content as prefilled value
@@ -201,6 +227,7 @@ function createPostDivs(post){
     postContainer.appendChild(document.createElement("br"))
     postContainer.appendChild(postContent);
     postContainer.appendChild(postLikes);
+    postContainer.appendChild(likeButton);
     postContainer.appendChild(postTimestamp);
     if (document.querySelector("#currUserUsername").innerHTML == `<strong>${post.creator}</strong>`){
         // hide edit button if user is not creator of a post
@@ -208,6 +235,23 @@ function createPostDivs(post){
     }
 
     return postContainer;
+}
+
+
+function fetchLikes(postIdString,postLikes,likeButton){
+    fetch(`../likes/${postIdString}`,)
+    .then(response => response.json())
+    .then(likedPost => {
+        numLikes = likedPost.numLikes
+        userLikesPost = likedPost.userLikesPost
+        postLikes.innerHTML = `<br> Likes: ${numLikes}`
+        if(userLikesPost == true){
+            likeButton.innerHTML = "Unlike"
+        }else{
+            likeButton.innerHTML = "Like"
+        }
+    })
+
 }
 
 // modify existing post
@@ -218,7 +262,7 @@ function modifyPost() {
     }
     let modifiedPostContent = document.querySelector('#modifyPost-content').value;
     
-    fetch(`modifyPost/${postId}`, {
+    fetch(`../modifyPost/${postId}`, {
         method: 'POST',
         //headers to enable the csrf_token functionality
         headers: {
@@ -245,4 +289,22 @@ function modifyPost() {
                 modifyPostInputField.innerHTML=""
             })
     })
+}
+
+// make sure the csrf token functionality can be used
+// using jQuery
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }

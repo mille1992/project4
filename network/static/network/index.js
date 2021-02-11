@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded',function(){
             // if on index page
             if (document.querySelector('#postHeader').innerHTML == "Posts of your followed Users") {
                 // handover argument to load following-posts based on the page number and the dataset value of the pagenav
+                document.querySelector('#profile-creator').innerHTML = "";
+                document.querySelector('#profile-followers').innerHTML = "";
+                document.querySelector('#profile-follows').innerHTML = "";
+                console.log('test')
                 load_posts(`followingLink+${event.target.dataset.pagecnt}+${pageNumber}`);
             }
 
